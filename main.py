@@ -4,13 +4,12 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from supabase import create_client, Client
 
 app = Flask(__name__)
-# 使用 Render 设置的密钥，如果本地运行请确保已 export 环境变量
+# 生产环境建议在 Render 环境变量中设置 FLASK_SECRET_KEY
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-key-2026")
 
-# 从环境变量读取配置，确保安全且适配 Render
-SUPABASE_URL = "https://yfycdaoxlevyiuqaonbs.supabase.co"
-SUPABASE_KEY = "sb_publishable_T_IGIGMN2-Ll4p0yOumE4Q_Le91Q1Fx"
-
+# 获取 Supabase 配置
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://yfycdaoxlevyiuqaonbs.supabase.co")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_publishable_T_IGIGMN2-Ll4p0yOumE4Q_Le91Q1Fx")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 BUCKET_NAME = "video"
 
@@ -29,28 +28,18 @@ def login():
         flash("❌ Invalid credentials.")
     return render_template('login.html')
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username, password = request.form.get('username'), request.form.get('password')
-        if supabase.table("users").select("*").eq("username", username).execute().data:
-            flash("🚫 Username exists.")
-        else:
-            supabase.table("users").insert({"username": username, "password": password, "avatar_url": None}).execute()
-            return redirect(url_for('login'))
-    return render_template('register.html')
-
 @app.route('/home')
 def home():
     if 'username' not in session: return redirect(url_for('login'))
     tab = request.args.get('tab', 'explore')
+    # 获取用户信息
     u_res = supabase.table("users").select("*").eq("username", session['username']).execute()
     user_info = u_res.data[0] if u_res.data else {"username": session['username'], "avatar_url": None}
-    
+    # 获取视频列表 - 使用 desc=True 修正之前的错误
     if tab == 'my_studio':
         v_res = supabase.table("videos").select("*").eq("username", session['username']).execute()
     else:
-        v_res = supabase.table("videos").select("*").order("created_at", descending=True).execute()
+        v_res = supabase.table("videos").select("*").order("created_at", desc=True).execute()
     return render_template('home.html', username=session['username'], user_info=user_info, videos=v_res.data or [], current_tab=tab)
 
 @app.route('/upload', methods=['POST'])
@@ -66,6 +55,7 @@ def upload_video():
         supabase.storage.from_(BUCKET_NAME).upload(fname, file.read(), {"content-type": file.content_type})
         url = supabase.storage.from_(BUCKET_NAME).get_public_url(fname)
         supabase.table("videos").insert({"username": session['username'], "title": title, "video_url": url, "filename": fname, "avatar_url": avatar}).execute()
+        flash("🚀 Upload success!")
     return redirect(url_for('home', tab='my_studio'))
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -81,7 +71,7 @@ def edit_profile():
         if data: supabase.table("users").update(data).eq("username", session['username']).execute()
         return redirect(url_for('home'))
     res = supabase.table("users").select("*").eq("username", session['username']).execute()
-    return render_template('profile.html', user_info=res.data[0])
+    return render_template('profile.html', user_info=res.data[0] if res.data else {})
 
 @app.route('/delete/<int:video_id>', methods=['POST'])
 def delete_video(video_id):
