@@ -9,7 +9,7 @@ app = Flask(__name__)
 # 1. 安全与密钥配置 ( Flask Session 密钥 )
 # ========================================================
 try:
-    # 尝试读取你原本的 local/secrets 配置
+    # 尝试读取本地的 secrets 配置
     import toml
     secrets = toml.load("secrets.toml")
     FLASK_KEY = secrets["flask"]["secret_key"]
@@ -166,6 +166,42 @@ def upload_video():
             
     flash("❌ Missing video file or title.")
     return redirect(url_for('home'))
+
+
+@app.route('/delete/<int:video_id>', methods=['POST'])
+def delete_video(video_id):
+    """【新功能】安全删除作品：同时清理云硬盘文件与云数据库记录"""
+    if 'username' not in session:
+        return redirect(url_for('login'))
+        
+    try:
+        # 1. 先从数据库里查出这个视频的信息，为了拿到文件名(filename)
+        response = supabase.table("videos").select("*").eq("id", video_id).execute()
+        video_data = response.data
+        
+        if not video_data:
+            flash("❌ Video not found.")
+            return redirect(url_for('home', tab='my_studio'))
+            
+        video = video_data[0]
+        
+        # 🔒 安全防线：验证当前登录人是不是视频的创作者，防止被别人恶意调用接口删除
+        if video['username'] != session['username']:
+            flash("🚫 Security Alert: You don't have permission to delete this video.")
+            return redirect(url_for('home', tab='my_studio'))
+            
+        # 2. 从 Supabase Storage 云硬盘中把实际视频文件抹除，瞬间释放 1GB 免费空间
+        supabase.storage.from_("videos").remove([video['filename']])
+        
+        # 3. 从 Supabase Database 云数据库中将这条记录一并彻底删除
+        supabase.table("videos").delete().eq("id", video_id).execute()
+        
+        flash("🗑️ Video deleted successfully! Cloud storage space released.")
+        
+    except Exception as e:
+        flash(f"⚠️ Delete Error: {str(e)}")
+        
+    return redirect(url_for('home', tab='my_studio'))
 
 
 @app.route('/logout')
