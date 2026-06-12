@@ -70,12 +70,26 @@ def edit_profile():
 @app.route('/upload', methods=['POST'])
 def upload_video():
     if 'username' not in session: return redirect(url_for('login'))
-    title, file = request.form.get('title'), request.files.get('file')
+    
+    title = request.form.get('title')
+    file = request.files.get('file')
+    
     if file and title:
+        # 1. 生成唯一文件名
         fname = f"{uuid.uuid4()}{os.path.splitext(file.filename)[1]}"
+        
+        # 2. 上传到 Supabase Storage
         supabase.storage.from_(BUCKET_NAME).upload(fname, file.read(), {"content-type": file.content_type})
         url = supabase.storage.from_(BUCKET_NAME).get_public_url(fname)
-        supabase.table("videos").insert({"username": session['username'], "title": title, "video_url": url}).execute()
+        
+        # 3. 插入数据到数据库 (关键：必须带上 filename)
+        supabase.table("videos").insert({
+            "username": session['username'], 
+            "title": title, 
+            "video_url": url, 
+            "filename": fname  # 这就是报错缺失的字段！
+        }).execute()
+        
     return redirect(url_for('home', tab='my_studio'))
 
 @app.route('/logout')
