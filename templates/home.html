@@ -29,7 +29,7 @@
                 {% if user_info.avatar_url %}
                     <img src="{{ user_info.avatar_url }}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #ffb703;">
                 {% else %}
-                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #ffb703; color: #000; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px;">
+                    <div style="width: 42px; height: 42px; border-radius: 50%; background: #ffb703; color: #000; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px; border: 2px solid #ffb703;">
                         {{ username[0].upper() }}
                     </div>
                 {% endif %}
@@ -74,7 +74,7 @@
                 <div class="video-meta">Shared by: @{{ video.username }}</div>
                 
                 {% if current_tab == 'my_studio' %}
-                    <form action="{{ url_for('delete_video', video_id=video.id) }}" method="POST" onsubmit="return confirm('Delete this video?');" style="margin-top: auto;">
+                    <form action="{{ url_for('delete_video', video_id=video.id) }}" method="POST" onsubmit="return confirm('Delete this video from the cloud?');" style="margin-top: auto;">
                         <button type="submit" style="background-color: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 12px;">
                             🗑️ Delete Video
                         </button>
