@@ -41,6 +41,11 @@ def home():
     else:
         res = supabase.table("videos").select("*").order("created_at", desc=True).execute()
     return render_template('home.html', user_info=user_info, videos=res.data or [], current_tab=tab)
+# 将这段加到 main.py 任意 @app.route 之前
+@app.route('/register')
+def register():
+    return "Registration is not available in this demo."
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 def edit_profile():
