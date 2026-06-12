@@ -16,7 +16,17 @@
 <body>
     <div class="header">
         <h1>⚡ VibeShare</h1>
-        <div><a href="/logout" style="color:red;">退出</a></div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <a href="/profile" style="color:#fff; text-decoration:none; display:flex; align-items:center; gap:8px;">
+                {% if user_info.avatar_url %}
+                    <img src="{{ user_info.avatar_url }}" style="width:35px; height:35px; border-radius:50%;">
+                {% else %}
+                    <div style="width:35px; height:35px; border-radius:50%; background:#444; text-align:center; line-height:35px;">{{ username[0].upper() }}</div>
+                {% endif %}
+                <strong>{{ username }}</strong>
+            </a>
+            <a href="/logout" style="color:red; margin-left:10px;">Logout</a>
+        </div>
     </div>
 
     <div class="tabs">
@@ -29,22 +39,17 @@
         <div class="card">
             <video src="{{ video.video_url }}" controls></video>
             <h3>{{ video.title }}</h3>
-            <p>发布者: {{ video.username }}</p>
-            {% if current_tab == 'my_studio' %}
-            <form action="{{ url_for('delete_video', video_id=video.id) }}" method="POST">
-                <button style="background:red; color:#fff; border:none; width:100%;">删除</button>
-            </form>
-            {% endif %}
+            <p>@{{ video.username }}</p>
         </div>
         {% endfor %}
     </div>
 
     <div style="margin-top:50px; border-top:1px solid #333; padding-top:20px;">
-        <h3>上传视频</h3>
+        <h3>Upload Video</h3>
         <form action="/upload" method="POST" enctype="multipart/form-data">
-            <input type="text" name="title" placeholder="标题" required>
+            <input type="text" name="title" placeholder="Title" required>
             <input type="file" name="file" required>
-            <button type="submit">发布</button>
+            <button type="submit">Publish</button>
         </form>
     </div>
 </body>
