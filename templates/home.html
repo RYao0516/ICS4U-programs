@@ -1,34 +1,22 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>VibeShare - ICS4U</title>
+    <title>VibeShare</title>
     <style>
-        body { background: #0d0d0d; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 20px; }
-        
-        /* 导航 Tab 样式 */
+        body { background: #0d0d0d; color: #fff; font-family: sans-serif; padding: 20px; }
+        .header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 20px; }
         .tabs { margin: 20px 0; display: flex; gap: 20px; }
-        .tabs a { color: #888; text-decoration: none; font-weight: bold; padding-bottom: 5px; transition: 0.3s; }
+        .tabs a { color: #888; text-decoration: none; font-weight: bold; }
         .tabs a.active { color: #ffb703; border-bottom: 2px solid #ffb703; }
-        
-        /* 视频网格布局 */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .card { background: #161616; padding: 15px; border-radius: 12px; }
-        video { width: 100%; border-radius: 8px; background: #000; }
-        
-        /* 按钮与上传区 */
-        .btn-delete { background: #ff3333; color: white; border: none; padding: 8px; width: 100%; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        .upload-section { margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: #161616; padding: 15px; border-radius: 10px; }
+        video { width: 100%; border-radius: 8px; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>⚡ VibeShare</h1>
-        <div>
-            用户: <strong>{{ username }}</strong> | 
-            <a href="/logout" style="color: #ff3333; margin-left: 10px;">退出登录</a>
-        </div>
+        <div><a href="/logout" style="color:red;">退出</a></div>
     </div>
 
     <div class="tabs">
@@ -37,40 +25,26 @@
     </div>
 
     <div class="grid">
-        {% if videos %}
-            {% for video in videos %}
-            <div class="card">
-                <video src="{{ video.video_url }}" controls></video>
-                <h3 style="margin: 10px 0;">{{ video.title }}</h3>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    {% if video.avatar_url %}
-                        <img src="{{ video.avatar_url }}" style="width:30px; height:30px; border-radius:50%;">
-                    {% else %}
-                        <div style="width:30px; height:30px; border-radius:50%; background:#555; text-align:center; line-height:30px;">
-                            {{ video.username[0].upper() }}
-                        </div>
-                    {% endif %}
-                    <span>@{{ video.username }}</span>
-                </div>
-                
-                {% if current_tab == 'my_studio' %}
-                <form action="{{ url_for('delete_video', video_id=video.id) }}" method="POST">
-                    <button class="btn-delete">删除视频</button>
-                </form>
-                {% endif %}
-            </div>
-            {% endfor %}
-        {% else %}
-            <p style="color: #666; font-size: 1.2em;">当前没有视频，快去上传一个吧！</p>
-        {% endif %}
+        {% for video in videos %}
+        <div class="card">
+            <video src="{{ video.video_url }}" controls></video>
+            <h3>{{ video.title }}</h3>
+            <p>发布者: {{ video.username }}</p>
+            {% if current_tab == 'my_studio' %}
+            <form action="{{ url_for('delete_video', video_id=video.id) }}" method="POST">
+                <button style="background:red; color:#fff; border:none; width:100%;">删除</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
 
-    <div class="upload-section">
-        <h3>上传新视频</h3>
+    <div style="margin-top:50px; border-top:1px solid #333; padding-top:20px;">
+        <h3>上传视频</h3>
         <form action="/upload" method="POST" enctype="multipart/form-data">
-            <input type="text" name="title" placeholder="视频标题" required style="padding: 8px;">
-            <input type="file" name="file" required style="color: #fff;">
-            <button type="submit" style="padding: 8px 16px; background: #ffb703; border: none; cursor: pointer; border-radius: 4px;">发布</button>
+            <input type="text" name="title" placeholder="标题" required>
+            <input type="file" name="file" required>
+            <button type="submit">发布</button>
         </form>
     </div>
 </body>
