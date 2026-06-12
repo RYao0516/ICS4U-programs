@@ -42,6 +42,26 @@ def home():
         res = supabase.table("videos").select("*").order("created_at", desc=True).execute()
     return render_template('home.html', user_info=user_info, videos=res.data or [], current_tab=tab)
 
+@app.route('/profile', methods=['GET', 'POST'])
+def edit_profile():
+    if 'username' not in session: return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        file = request.files.get('avatar')
+        if file and file.filename:
+            # 使用唯一文件名，存入 'video' 存储桶
+            fname = f"avatar-{session['username']}-{uuid.uuid4()}"
+            supabase.storage.from_("video").upload(fname, file.read(), {"content-type": file.content_type})
+            url = supabase.storage.from_("video").get_public_url(fname)
+            
+            # 更新用户信息
+            supabase.table("users").update({"avatar_url": url}).eq("username", session['username']).execute()
+            
+        return redirect(url_for('home'))
+        
+    res = supabase.table("users").select("*").eq("username", session['username']).execute()
+    return render_template('profile.html', user_info=res.data[0] if res.data else {})
+
 @app.route('/upload', methods=['POST'])
 def upload_video():
     if 'username' not in session: return redirect(url_for('login'))

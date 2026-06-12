@@ -1,74 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>VibeShare - Edit Profile</title>
+    <title>Edit Profile</title>
     <style>
-        body { background-color: #0d0d0d; color: #e5e5e5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .profile-card { background: linear-gradient(145deg, #161616, #1f1f1f); padding: 40px; border-radius: 16px; border: 1px solid #262626; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { color: #fff; margin-bottom: 25px; font-size: 24px; letter-spacing: 1px; }
-        
-        /* 酷炫圆形头像容器 */
-        .avatar-container { position: relative; width: 120px; height: 120px; margin: 0 auto 25px auto; cursor: pointer; }
-        .avatar-preview { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #ffb703; box-shadow: 0 0 15px rgba(255,183,3,0.2); background-color: #262626; }
-        .avatar-placeholder { width: 100%; height: 100%; border-radius: 50%; display: flex; justify-content: center; align-items: center; background: #262626; color: #ffb703; font-size: 36px; font-weight: bold; border: 3px solid #ffb703; }
-        .upload-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; color: #fff; font-size: 12px; font-weight: bold; opacity: 0; transition: opacity 0.2s; }
-        .avatar-container:hover .upload-overlay { opacity: 1; }
-        
-        input[type="text"] { width: 100%; padding: 12px; margin: 15px 0; background: #262626; border: 1px solid #404040; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
-        .btn-save { width: 100%; padding: 12px; background-color: #ffb703; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.2s; }
-        .btn-save:hover { background-color: #fb8500; }
-        .back-link { display: inline-block; margin-top: 20px; color: #8c8c8c; text-decoration: none; font-size: 14px; }
-        .back-link:hover { color: #ffb703; }
+        body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 8px; width: 300px; margin: auto; }
     </style>
 </head>
 <body>
-    <div class="profile-card">
-        <h2>⚡ Edit Your Profile</h2>
-        
-        <form action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data">
-            <div class="avatar-container" onclick="document.getElementById('avatar-input').click();">
-                {% if user_info.avatar_url %}
-                    <img id="avatar-img" src="{{ user_info.avatar_url }}" class="avatar-preview">
-                {% else %}
-                    <div id="avatar-txt" class="avatar-placeholder">{{ user_info.username[0].upper() }}</div>
-                {% endif %}
-                <div class="upload-overlay">Upload Image</div>
-            </div>
-            
-            <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display: none;" onchange="previewImage(this);">
-            
-            <label style="text-align: left; display: block; font-size: 13px; color: #8c8c8c;">Username</label>
-            <input type="text" name="username" value="{{ user_info.username }}" required>
-            
-            <button type="submit" class="btn-save">Save Profile</button>
+    <div class="card">
+        <h2>Change Avatar</h2>
+        <form action="/profile" method="POST" enctype="multipart/form-data">
+            <input type="file" name="avatar" accept="image/*" required>
+            <br><br>
+            <button type="submit">Upload & Save</button>
         </form>
-        
-        <a href="{{ url_for('home') }}" class="back-link">← Cancel & Go Back</a>
+        <br>
+        <a href="/home">Back to Home</a>
     </div>
-
-    <script>
-        // 前端动态预览选中的图片
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var img = document.getElementById('avatar-img');
-                    var txt = document.getElementById('avatar-txt');
-                    if (img) {
-                        img.src = e.target.result;
-                    } else if (txt) {
-                        // 如果原本没有图片，就临时创建一个 img 标签
-                        var newImg = document.createElement('img');
-                        newImg.id = 'avatar-img';
-                        newImg.className = 'avatar-preview';
-                        newImg.src = e.target.result;
-                        txt.parentNode.replaceChild(newImg, txt);
-                    }
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-    </script>
 </body>
 </html>
