@@ -1,17 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VibeShare</title>
     <style>
-        body { background: #f4f7f6; color: #333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; }
-        .header { background: #fff; padding: 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .tabs { margin: 20px 0; display: flex; gap: 20px; background: #fff; padding: 15px; border-radius: 8px; }
-        .tabs a { color: #666; text-decoration: none; font-weight: 600; }
+        body { background: #f4f7f6; color: #333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 15px; margin: 0; }
+        .header { background: #fff; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        .tabs { margin: 20px 0; display: flex; gap: 15px; background: #fff; padding: 10px; border-radius: 8px; overflow-x: auto; }
+        .tabs a { color: #666; text-decoration: none; font-weight: 600; white-space: nowrap; }
         .tabs a.active { color: #007bff; border-bottom: 2px solid #007bff; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        
         .card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         video { width: 100%; border-radius: 4px; background: #eee; }
+        
         button { background: #007bff; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .upload-section { background: #fff; margin-top: 30px; padding: 20px; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -20,15 +30,15 @@
         <div style="display:flex; align-items:center; gap:10px;">
             <a href="/profile" style="text-decoration:none; color:#333; display:flex; align-items:center; gap:8px;">
                 {% if user_info.avatar_url %}
-                    <img src="{{ user_info.avatar_url }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                    <img src="{{ user_info.avatar_url }}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;">
                 {% else %}
-                    <div style="width:40px; height:40px; border-radius:50%; background:#ddd; display:flex; align-items:center; justify-content:center;">
+                    <div style="width:35px; height:35px; border-radius:50%; background:#ddd; display:flex; align-items:center; justify-content:center;">
                         {{ user_info.username[0].upper() }}
                     </div>
                 {% endif %}
                 <strong>{{ user_info.username }}</strong>
             </a>
-            <a href="/logout" style="margin-left:15px; color:#666;">Logout</a>
+            <a href="/logout" style="color:#666; margin-left:10px;">Logout</a>
         </div>
     </div>
 
@@ -47,11 +57,12 @@
         {% endfor %}
     </div>
 
-    <div style="margin-top:40px; background:#fff; padding:20px; border-radius:8px;">
+    <div class="upload-section">
         <h3>Upload New Video</h3>
         <form action="/upload" method="POST" enctype="multipart/form-data">
-            <input type="text" name="title" placeholder="Title" required>
-            <input type="file" name="file" required>
+            <input type="text" name="title" placeholder="Title" required style="width:90%; padding:8px; margin-bottom:10px;">
+            <input type="file" name="file" required style="width:90%; margin-bottom:10px;">
+            <br>
             <button type="submit">Publish</button>
         </form>
     </div>
