@@ -27,49 +27,31 @@ def login():
         return "Invalid login", 401
     return render_template('login.html')
 
-@app.route('/register')
-def register():
-    return "Registration disabled."
-
 @app.route('/home')
 def home():
     if 'username' not in session: return redirect(url_for('login'))
     tab = request.args.get('tab', 'explore')
+    # Fetch user data for the corner profile display
     u_res = supabase.table("users").select("*").eq("username", session['username']).execute()
     user_info = u_res.data[0] if u_res.data else {"username": session['username'], "avatar_url": None}
     
+    # Query logic
     if tab == 'my_studio':
         res = supabase.table("videos").select("*").eq("username", session['username']).order("created_at", desc=True).execute()
     else:
         res = supabase.table("videos").select("*").order("created_at", desc=True).execute()
-    return render_template('home.html', username=session['username'], user_info=user_info, videos=res.data or [], current_tab=tab)
+    return render_template('home.html', user_info=user_info, videos=res.data or [], current_tab=tab)
 
 @app.route('/upload', methods=['POST'])
 def upload_video():
     if 'username' not in session: return redirect(url_for('login'))
-    u_res = supabase.table("users").select("avatar_url").eq("username", session['username']).execute()
-    avatar = u_res.data[0].get('avatar_url') if u_res.data else None
     title, file = request.form.get('title'), request.files.get('file')
     if file and title:
         fname = f"{uuid.uuid4()}{os.path.splitext(file.filename)[1]}"
         supabase.storage.from_(BUCKET_NAME).upload(fname, file.read(), {"content-type": file.content_type})
         url = supabase.storage.from_(BUCKET_NAME).get_public_url(fname)
-        supabase.table("videos").insert({"username": session['username'], "title": title, "video_url": url, "filename": fname, "avatar_url": avatar}).execute()
+        supabase.table("videos").insert({"username": session['username'], "title": title, "video_url": url}).execute()
     return redirect(url_for('home', tab='my_studio'))
-
-@app.route('/profile', methods=['GET', 'POST'])
-def edit_profile():
-    if 'username' not in session: return redirect(url_for('login'))
-    if request.method == 'POST':
-        file = request.files.get('avatar')
-        if file and file.filename:
-            fname = f"avatar-{session['username']}-{uuid.uuid4()}"
-            supabase.storage.from_(BUCKET_NAME).upload(fname, file.read(), {"content-type": file.content_type})
-            url = supabase.storage.from_(BUCKET_NAME).get_public_url(fname)
-            supabase.table("users").update({"avatar_url": url}).eq("username", session['username']).execute()
-        return redirect(url_for('home'))
-    res = supabase.table("users").select("*").eq("username", session['username']).execute()
-    return render_template('profile.html', user_info=res.data[0] if res.data else {})
 
 @app.route('/logout')
 def logout():

@@ -3,30 +3,21 @@
 <head>
     <title>VibeShare</title>
     <style>
-        body { background: #0d0d0d; color: #fff; font-family: sans-serif; padding: 20px; }
-        .header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 20px; }
-        .tabs { margin: 20px 0; display: flex; gap: 20px; }
-        .tabs a { color: #888; text-decoration: none; font-weight: bold; }
-        .tabs a.active { color: #ffb703; border-bottom: 2px solid #ffb703; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: #161616; padding: 15px; border-radius: 10px; }
-        video { width: 100%; border-radius: 8px; }
+        body { background: #f4f7f6; color: #333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; }
+        .header { background: #fff; padding: 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tabs { margin: 20px 0; display: flex; gap: 20px; background: #fff; padding: 15px; border-radius: 8px; }
+        .tabs a { color: #666; text-decoration: none; font-weight: 600; }
+        .tabs a.active { color: #007bff; border-bottom: 2px solid #007bff; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        video { width: 100%; border-radius: 4px; background: #eee; }
+        button { background: #007bff; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>⚡ VibeShare</h1>
-        <div style="display:flex; align-items:center; gap:10px;">
-            <a href="/profile" style="color:#fff; text-decoration:none; display:flex; align-items:center; gap:8px;">
-                {% if user_info.avatar_url %}
-                    <img src="{{ user_info.avatar_url }}" style="width:35px; height:35px; border-radius:50%;">
-                {% else %}
-                    <div style="width:35px; height:35px; border-radius:50%; background:#444; text-align:center; line-height:35px;">{{ username[0].upper() }}</div>
-                {% endif %}
-                <strong>{{ username }}</strong>
-            </a>
-            <a href="/logout" style="color:red; margin-left:10px;">Logout</a>
-        </div>
+        <div><strong>{{ user_info.username }}</strong> | <a href="/logout">Logout</a></div>
     </div>
 
     <div class="tabs">
@@ -39,13 +30,13 @@
         <div class="card">
             <video src="{{ video.video_url }}" controls></video>
             <h3>{{ video.title }}</h3>
-            <p>@{{ video.username }}</p>
+            <p>By: {{ video.username }}</p>
         </div>
         {% endfor %}
     </div>
 
-    <div style="margin-top:50px; border-top:1px solid #333; padding-top:20px;">
-        <h3>Upload Video</h3>
+    <div style="margin-top:40px; background:#fff; padding:20px; border-radius:8px;">
+        <h3>Upload New Video</h3>
         <form action="/upload" method="POST" enctype="multipart/form-data">
             <input type="text" name="title" placeholder="Title" required>
             <input type="file" name="file" required>
