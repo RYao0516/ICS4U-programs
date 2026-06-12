@@ -45,7 +45,7 @@ def home():
 @app.route('/upload', methods=['POST'])
 def upload_video():
     if 'username' not in session: return redirect(url_for('login'))
-    # 获取当前头像，上传时带上
+    # 核心：上传时获取当前头像，并存入 videos 表
     u_res = supabase.table("users").select("avatar_url").eq("username", session['username']).execute()
     avatar = u_res.data[0].get('avatar_url') if u_res.data else None
     
